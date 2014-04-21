@@ -1,2 +1,4 @@
-OuvidoriaCliente-EP1
-====================
+Ouvidoria Client
+===============
+
+It is an Android Application.
