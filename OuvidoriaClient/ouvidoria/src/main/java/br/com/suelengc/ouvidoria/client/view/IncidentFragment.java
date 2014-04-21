@@ -9,9 +9,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -32,7 +35,7 @@ import br.com.suelengc.ouvidoria.client.task.CategoryTask;
 import br.com.suelengc.ouvidoria.client.task.SendIncidentTask;
 import br.com.suelengc.ouvidoria.client.util.ImageUtil;
 
-public class IncidentActivity extends Activity {
+public class IncidentFragment extends Fragment {
     public static final String USER = "user";
 
     private Incident incident = new Incident();
@@ -47,15 +50,15 @@ public class IncidentActivity extends Activity {
     private Preferences preferences;
     private Category category;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_incident);
 
-        preferences = new Preferences(this);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.activity_incident, container, false);
+
+        preferences = new Preferences(getActivity());
 
         if (!preferences.getCategoriesLoaded()) {
-            new CategoryTask(this, new CategoryTask.CategoryTaskCallback() {
+            new CategoryTask(getActivity(), new CategoryTask.CategoryTaskCallback() {
                 @Override
                 public void onCategoryReturn(List<Category> categories) {
                     loadCategories(categories);
@@ -65,16 +68,16 @@ public class IncidentActivity extends Activity {
 
         startToGetLocation();
 
-        user = (User) getIntent().getSerializableExtra(USER);
+        user = (User) getArguments().getSerializable(USER);
 
-        photo = (ImageView) findViewById(R.id.photo);
-        description = (EditText) findViewById(R.id.description);
-        categoryList = (AutoCompleteTextView) findViewById(R.id.category);
+        photo = (ImageView) view.findViewById(R.id.photo);
+        description = (EditText) view.findViewById(R.id.description);
+        categoryList = (AutoCompleteTextView) view.findViewById(R.id.category);
 
         photo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                photoPath = getExternalFilesDir(null) + "/" + System.currentTimeMillis() + ".jpg";
+                photoPath = getActivity().getExternalFilesDir(null) + "/" + System.currentTimeMillis() + ".jpg";
 
                 Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 camera.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(new File(photoPath)));
@@ -83,10 +86,15 @@ public class IncidentActivity extends Activity {
         });
 
         loadCategories(null);
+
+        setHasOptionsMenu(true);
+
+        return view;
     }
 
+
     private void startToGetLocation() {
-        locationListener = new MyLocationListener(this, new MyLocationListener.LocationListenerCallback() {
+        locationListener = new MyLocationListener(getActivity(), new MyLocationListener.LocationListenerCallback() {
             @Override
             public void afterGetLocation(Location newLocation) {
                 location = newLocation;
@@ -97,10 +105,10 @@ public class IncidentActivity extends Activity {
     private void loadCategories(List<Category> categories) {
 
         if (categories == null) {
-            CategoryDAO categoryDAO = new CategoryDAO(this);
+            CategoryDAO categoryDAO = new CategoryDAO(getActivity());
             categories = categoryDAO.getAll();
         }
-        ArrayAdapter<Category> adapter = new ArrayAdapter<Category>(this, android.R.layout.simple_list_item_1, categories);
+        ArrayAdapter<Category> adapter = new ArrayAdapter<Category>(getActivity(), android.R.layout.simple_list_item_1, categories);
         categoryList.setAdapter(adapter);
 
         categoryList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -113,7 +121,7 @@ public class IncidentActivity extends Activity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
             Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
             bitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false);
@@ -124,10 +132,12 @@ public class IncidentActivity extends Activity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_incident, menu);
-        return true;
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_incident, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -139,14 +149,8 @@ public class IncidentActivity extends Activity {
 
             incident.setUser(user);
 
-            new SendIncidentTask(this).execute(incident);
+            new SendIncidentTask(getActivity()).execute(incident);
         }
         return false;
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        locationListener.cancelUpdates();
     }
 }

@@ -69,7 +69,6 @@ public class LoginActivity extends ActionBarActivity implements LoginTask.LoginC
 
     private void callIncidentActivity() {
 
-        //Intent incident = new Intent(this, IncidentActivity.class);
         Intent incident = new Intent(this, MainActivity.class);
         incident.putExtra(USER, user);
         startActivity(incident);

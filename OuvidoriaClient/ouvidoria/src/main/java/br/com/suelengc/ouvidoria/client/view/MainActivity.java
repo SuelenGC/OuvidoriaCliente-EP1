@@ -1,5 +1,6 @@
 package br.com.suelengc.ouvidoria.client.view;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -7,6 +8,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 
 import br.com.suelengc.ouvidoria.client.R;
+import br.com.suelengc.ouvidoria.client.model.Incident;
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -25,9 +27,15 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
+        IncidentFragment incidentFragment = new IncidentFragment();
+
+        Bundle args = new Bundle();
+        args.putSerializable(IncidentFragment.USER, getIntent().getSerializableExtra(IncidentFragment.USER));
+        incidentFragment.setArguments(args);
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, new FragmentFake())
+                .replace(R.id.container, incidentFragment)
                 .commit();
     }
 
