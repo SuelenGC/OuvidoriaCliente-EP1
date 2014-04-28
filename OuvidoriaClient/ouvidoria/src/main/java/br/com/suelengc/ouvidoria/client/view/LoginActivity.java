@@ -52,9 +52,6 @@ public class LoginActivity extends ActionBarActivity implements LoginTask.LoginC
         uspNumber = (EditText) findViewById(R.id.usp_number);
         password = (EditText) findViewById(R.id.password);
 
-        uspNumber.setText("6109482");
-        password.setText("Einstein@1");
-
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
