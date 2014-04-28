@@ -5,7 +5,14 @@ import java.io.Serializable;
 public class User implements Serializable {
     private String email;
     private String uspNumber;
-    private String userName;
+    private String name;
+
+    public User() {}
+
+    public User(String uspNumber, String uspName) {
+        this.uspNumber = uspNumber;
+        this.name = uspName;
+    }
 
     public String getEmail() {
         return email;
@@ -24,15 +31,15 @@ public class User implements Serializable {
     }
 
     public String getName() {
-        return userName;
+        return name;
     }
 
     public void setName(String userName) {
-        this.userName = userName;
+        this.name = userName;
     }
 
     @Override
     public String toString() {
-        return userName + " / " + email + " / " + uspNumber;
+        return name + " / " + email + " / " + uspNumber;
     }
 }

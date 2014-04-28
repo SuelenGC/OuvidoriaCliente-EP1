@@ -13,7 +13,9 @@ public class IncidentParser {
         try {
             js.object();
             js.key("incidentrecord").object();
+
             js.key("user").value(incident.getUser().getUspNumber());
+            js.key("login").value(incident.getUser().getName());
             js.key("description").value(incident.getDescription());
             js.key("localization").value(incident.getCategory().getAbbreviation());
 
@@ -26,6 +28,7 @@ public class IncidentParser {
             }
 
             js.key("photo").value(incident.getPhotoBase64());
+
             js.endObject();
             js.endObject();
 

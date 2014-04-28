@@ -1,6 +1,5 @@
 package br.com.suelengc.ouvidoria.client.task;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 
@@ -16,13 +15,13 @@ public class CategoryTask extends AsyncTask<Void, Void, List<Category>> {
 
     private final String URL = "http://uspservices.deusanyjunior.dj/categoriaslocal.json";
     private final Context context;
-    private CategoryTaskCallback callback;
+    private CategoryCallback callback;
 
-    public interface CategoryTaskCallback {
+    public interface CategoryCallback {
         public void onCategoryReturn(List<Category> categories);
     }
 
-    public CategoryTask(Context context, CategoryTaskCallback callback) {
+    public CategoryTask(Context context, CategoryCallback callback) {
         this.context = context;
         this.callback = callback;
     }
@@ -40,7 +39,7 @@ public class CategoryTask extends AsyncTask<Void, Void, List<Category>> {
     protected void onPostExecute(List<Category> categories) {
         new Preferences(context).setCategoriesLoaded(true);
         CategoryDAO dao = new CategoryDAO(context);
-        dao.insert(categories);
+        dao.save(categories);
         callback.onCategoryReturn(categories);
     }
 }

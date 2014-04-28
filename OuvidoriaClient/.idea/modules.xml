@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/IncidentesClient.iml" filepath="$PROJECT_DIR$/IncidentesClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/OuvidoriaClient.iml" filepath="$PROJECT_DIR$/OuvidoriaClient.iml" />
       <module fileurl="file://$PROJECT_DIR$/ouvidoria/ouvidoria.iml" filepath="$PROJECT_DIR$/ouvidoria/ouvidoria.iml" />
     </modules>
   </component>

@@ -26,11 +26,9 @@ public class LoginTask extends AsyncTask<Objects, Objects, String> {
         this.context = (Context) callback;
     }
 
-
     @Override
     protected void onPreExecute() {
-        progress = new ProgressDialog(context);
-        progress.show(context, "Verificando usuário", "Login sendo realizado...", false, false).show();
+        progress = ProgressDialog.show(context, "Verificando usuário", "Login sendo realizado...", true, true);
     }
 
     @Override
@@ -50,4 +48,5 @@ public class LoginTask extends AsyncTask<Objects, Objects, String> {
         LoginResponse loginResponse = new LoginParser().toLoginResponse(jsonResponse);
         callback.onLoginReturn(loginResponse);
     }
+
 }

@@ -8,7 +8,6 @@ public class LoginResponse {
     private String error;
     private User user;
 
-
     public User getUser() {
         return user;
     }

@@ -26,22 +26,28 @@ import java.util.List;
 
 import br.com.suelengc.ouvidoria.client.R;
 import br.com.suelengc.ouvidoria.client.dao.CategoryDAO;
+import br.com.suelengc.ouvidoria.client.dao.IncidentDAO;
 import br.com.suelengc.ouvidoria.client.location.MyLocationListener;
 import br.com.suelengc.ouvidoria.client.model.Category;
 import br.com.suelengc.ouvidoria.client.model.Incident;
+import br.com.suelengc.ouvidoria.client.model.Local;
 import br.com.suelengc.ouvidoria.client.model.User;
 import br.com.suelengc.ouvidoria.client.preferences.Preferences;
 import br.com.suelengc.ouvidoria.client.task.CategoryTask;
 import br.com.suelengc.ouvidoria.client.task.SendIncidentTask;
 import br.com.suelengc.ouvidoria.client.util.ImageUtil;
+import br.com.suelengc.ouvidoria.client.util.MessageUtil;
+import br.com.suelengc.ouvidoria.client.util.NetworkUtil;
 
-public class IncidentFragment extends Fragment {
+public class NewIncidentFragment extends Fragment {
     public static final String USER = "user";
+
+    private MessageUtil messageUtil;
 
     private Incident incident = new Incident();
     private String photoPath;
     private User user;
-    private Location location;
+    private Local location;
     private MyLocationListener locationListener;
 
     private ImageView photo;
@@ -50,23 +56,22 @@ public class IncidentFragment extends Fragment {
     private Preferences preferences;
     private Category category;
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_incident, container, false);
+        View view = inflater.inflate(R.layout.fragment_incident, container, false);
 
+        startToGetLocation();
         preferences = new Preferences(getActivity());
+        messageUtil = new MessageUtil(getActivity());
 
         if (!preferences.getCategoriesLoaded()) {
-            new CategoryTask(getActivity(), new CategoryTask.CategoryTaskCallback() {
+            new CategoryTask(getActivity(), new CategoryTask.CategoryCallback() {
                 @Override
                 public void onCategoryReturn(List<Category> categories) {
                     loadCategories(categories);
                 }
             }).execute();
         }
-
-        startToGetLocation();
 
         user = (User) getArguments().getSerializable(USER);
 
@@ -86,9 +91,7 @@ public class IncidentFragment extends Fragment {
         });
 
         loadCategories(null);
-
         setHasOptionsMenu(true);
-
         return view;
     }
 
@@ -97,7 +100,7 @@ public class IncidentFragment extends Fragment {
         locationListener = new MyLocationListener(getActivity(), new MyLocationListener.LocationListenerCallback() {
             @Override
             public void afterGetLocation(Location newLocation) {
-                location = newLocation;
+                new Local(newLocation.getLatitude(), newLocation.getLongitude());
             }
         });
     }
@@ -106,13 +109,12 @@ public class IncidentFragment extends Fragment {
 
         if (categories == null) {
             CategoryDAO categoryDAO = new CategoryDAO(getActivity());
-            categories = categoryDAO.getAll();
+            categories = categoryDAO.getCategories();
         }
         ArrayAdapter<Category> adapter = new ArrayAdapter<Category>(getActivity(), android.R.layout.simple_list_item_1, categories);
         categoryList.setAdapter(adapter);
 
         categoryList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
             @Override
             public void onItemClick(AdapterView<?> adapter, View view, int pos, long id) {
                 category = (Category) adapter.getItemAtPosition(pos);
@@ -137,8 +139,6 @@ public class IncidentFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_save) {
@@ -146,10 +146,22 @@ public class IncidentFragment extends Fragment {
             incident.setPhotoPath(photoPath);
             incident.setLocation(location);
             incident.setCategory(category);
-
             incident.setUser(user);
 
-            new SendIncidentTask(getActivity()).execute(incident);
+            if (new NetworkUtil(getActivity()).isOnline()) {
+                new SendIncidentTask(getActivity(), new SendIncidentTask.SendIncidentCallback() {
+                    @Override
+                    public void onSendIncidentReturn(String response) {
+                        messageUtil.sendUserMessage("Incidente enviado com sucesso!");
+                    }
+                }).execute(incident);
+
+            } else {
+                messageUtil.sendUserMessage(getResources().getString(R.string.no_connection));
+                IncidentDAO dao = new IncidentDAO(getActivity());
+                dao.save(incident);
+                messageUtil.sendUserMessage("Incidente salvo. Será enviado assim que houver conexão.");
+            }
         }
         return false;
     }

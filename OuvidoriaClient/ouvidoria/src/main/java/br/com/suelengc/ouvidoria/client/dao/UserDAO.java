@@ -20,8 +20,7 @@ public class UserDAO extends BaseDAO {
         //database.addDao(this);
     }
 
-    @Override
-    public String getDDL() {
+    static String getDDL() {
         return "create table " + TABLE_NAME + " (id integer primary key, name text, usp_number text, email text)";
     }
 

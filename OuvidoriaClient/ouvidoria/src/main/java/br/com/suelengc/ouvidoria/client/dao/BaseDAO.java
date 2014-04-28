@@ -2,13 +2,12 @@ package br.com.suelengc.ouvidoria.client.dao;
 
 import android.content.Context;
 
-public abstract class BaseDAO {
+abstract class BaseDAO {
 
+    protected static String TABLE_NAME;
     protected SQLiteBase database;
 
     public BaseDAO(Context context) {
         database = SQLiteBase.getInstance(context);
     }
-
-    abstract String getDDL();
 }

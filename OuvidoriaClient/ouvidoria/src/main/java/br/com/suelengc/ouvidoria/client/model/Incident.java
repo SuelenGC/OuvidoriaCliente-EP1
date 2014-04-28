@@ -1,15 +1,14 @@
 package br.com.suelengc.ouvidoria.client.model;
 
-import android.location.Location;
-
 public class Incident {
 
     private String photoBase64;
     private String photoPath;
     private String description;
-    private Location location;
+    private Local location;
     private User user;
     private Category category;
+    private Long id;
 
     public String getPhotoBase64() {
         return photoBase64;
@@ -35,11 +34,11 @@ public class Incident {
         this.description = description;
     }
 
-    public Location getLocation() {
+    public Local getLocation() {
         return this.location;
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(Local location) {
         this.location = location;
     }
 
@@ -51,16 +50,24 @@ public class Incident {
         this.category = category;
     }
 
-    @Override
-    public String toString() {
-        return description + " / " + photoPath + " / " + photoBase64;
-    }
-
     public void setUser(User user) {
         this.user = user;
     }
 
     public User getUser() {
         return user;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return id + " - " + description;
     }
 }

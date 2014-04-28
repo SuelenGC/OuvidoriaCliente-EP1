@@ -5,6 +5,15 @@ public class Category {
     private String abbreviation;
     private String name;
 
+    public Category() {
+
+    }
+
+    public Category(String categoryAbbreviation, String categoryName) {
+        this.abbreviation = categoryAbbreviation;
+        this.name = categoryName;
+    }
+
     public Long getId() {
         return id;
     }

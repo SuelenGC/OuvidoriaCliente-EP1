@@ -14,6 +14,8 @@ import br.com.suelengc.ouvidoria.client.model.User;
 import br.com.suelengc.ouvidoria.client.preferences.Preferences;
 import br.com.suelengc.ouvidoria.client.task.LoginResponse;
 import br.com.suelengc.ouvidoria.client.task.LoginTask;
+import br.com.suelengc.ouvidoria.client.util.MessageUtil;
+import br.com.suelengc.ouvidoria.client.util.NetworkUtil;
 
 
 public class LoginActivity extends ActionBarActivity implements LoginTask.LoginCallback {
@@ -24,18 +26,27 @@ public class LoginActivity extends ActionBarActivity implements LoginTask.LoginC
     private User user;
     private Preferences preferences;
     private UserDAO dao;
+    private MessageUtil messageUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        messageUtil = new MessageUtil(this);
+
         preferences = new Preferences(this);
         dao = new UserDAO(this);
 
         if (preferences.getLoggedUser()) {
             user = dao.getUniqueUser();
+            openIncident();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
         btnLogin = (Button) findViewById(R.id.btn_login);
         uspNumber = (EditText) findViewById(R.id.usp_number);
@@ -47,7 +58,11 @@ public class LoginActivity extends ActionBarActivity implements LoginTask.LoginC
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new LoginTask(LoginActivity.this).execute();
+                if (new NetworkUtil(LoginActivity.this).isOnline()) {
+                    new LoginTask(LoginActivity.this).execute();
+                } else {
+                    messageUtil.sendUserMessage(getString(R.string.no_connection));
+                }
             }
         });
     }
@@ -55,22 +70,25 @@ public class LoginActivity extends ActionBarActivity implements LoginTask.LoginC
     @Override
     public void onLoginReturn(LoginResponse jsonResult) {
         if (jsonResult.getStatus() == false) {
-            Toast.makeText(this, "Verifique sua conexão de dados. Não foi possível efetuar o login." + jsonResult.getError(), Toast.LENGTH_LONG).show();
+            String errorMessage = getString(R.string.wrong_user_or_password);
+            if (jsonResult.getError() != null && jsonResult.getError() != "") {
+                errorMessage += jsonResult.getError();
+            }
+            messageUtil.sendUserMessage(errorMessage);
 
         } else {
-            Toast.makeText(this, "Login efetuado com sucesso!", Toast.LENGTH_LONG).show();
+            messageUtil.sendUserMessage(getString(R.string.login_success));
             preferences.setLoggedUser(true);
             user = jsonResult.getUser();
             dao.insert(user);
-
-            callIncidentActivity();
+            openIncident();
         }
     }
 
-    private void callIncidentActivity() {
-
+    private void openIncident() {
         Intent incident = new Intent(this, MainActivity.class);
         incident.putExtra(USER, user);
         startActivity(incident);
+        finish();
     }
 }
